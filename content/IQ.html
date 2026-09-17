@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智商测试 · 简洁版</title>
+<style>
+  :root{
+    --bg:#f4f5f8;
+    --card:#ffffff;
+    --text:#191c22;
+    --sub:#5f6672;
+    --line:#e5e7ee;
+    --primary:#4f46e5;
+    --primary-soft:#eef0ff;
+    --ok:#0f9d58;
+    --bad:#d93025;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,20,40,.04), 0 8px 24px rgba(16,20,40,.06);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:15px;
+    line-height:1.6;
+    padding:32px 16px 64px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px;margin:0 auto}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:32px;
+  }
+  .screen{display:none;animation:fade .32s ease}
+  .screen.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* ---------- 首页 ---------- */
+  .brand{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);letter-spacing:.4px;margin-bottom:18px}
+  .brand i{width:8px;height:8px;border-radius:50%;background:var(--primary);display:block}
+  h1{font-size:29px;line-height:1.3;margin:0 0 10px;letter-spacing:-.4px}
+  h1 span{color:var(--primary)}
+  .lead{color:var(--sub);margin:0 0 26px;font-size:15px}
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
+  .fact{background:#f8f9fc;border:1px solid var(--line);border-radius:12px;padding:14px 12px;text-align:center}
+  .fact b{display:block;font-size:19px;letter-spacing:-.2px}
+  .fact small{color:var(--sub);font-size:12px}
+  .rules{margin:0 0 26px;padding:0;list-style:none}
+  .rules li{position:relative;padding-left:22px;color:var(--sub);font-size:14px;margin-bottom:8px}
+  .rules li::before{content:"";position:absolute;left:6px;top:10px;width:6px;height:6px;border-radius:2px;background:#c7cbd8}
+  .btn{
+    appearance:none;border:0;cursor:pointer;font:inherit;font-weight:600;
+    background:var(--primary);color:#fff;border-radius:12px;padding:14px 26px;
+    transition:transform .12s ease, box-shadow .2s ease, background .2s ease;
+    box-shadow:0 6px 16px rgba(79,70,229,.25);
+  }
+  .btn:hover{background:#443ad4;box-shadow:0 8px 20px rgba(79,70,229,.3)}
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none;font-weight:500}
+  .btn.ghost:hover{background:#f8f9fc;border-color:#d8dbe6}
+  .btn.block{width:100%}
+  .note{margin-top:18px;font-size:12.5px;color:#9aa0ad;line-height:1.7}
+
+  /* ---------- 答题页 ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;font-size:13px;color:var(--sub)}
+  .topbar .cat{background:var(--primary-soft);color:var(--primary);border-radius:999px;padding:3px 11px;font-weight:600;font-size:12px}
+  .progress{height:6px;background:#e9ebf2;border-radius:999px;overflow:hidden;margin-bottom:26px}
+  .progress i{display:block;height:100%;width:0;background:var(--primary);border-radius:999px;transition:width .3s cubic-bezier(.4,0,.2,1)}
+  .qtext{font-size:19px;line-height:1.65;margin:0 0 8px;font-weight:600;letter-spacing:-.2px}
+  .qsub{color:var(--sub);font-size:13.5px;margin:0 0 18px}
+  .qfig{display:flex;justify-content:center;gap:18px;margin:6px 0 22px;flex-wrap:wrap}
+  .qfig svg{display:block}
+
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opts.grid2{display:grid;grid-template-columns:repeat(2,1fr)}
+  .opt{
+    display:flex;align-items:center;gap:12px;text-align:left;width:100%;
+    background:#fff;border:1.5px solid var(--line);border-radius:12px;
+    padding:13px 16px;font:inherit;color:var(--text);cursor:pointer;
+    transition:border-color .16s ease, background .16s ease, transform .1s ease;
+  }
+  .opt:hover{border-color:#c3c8e6;background:#fafbff}
+  .opt .key{
+    flex:none;width:24px;height:24px;border-radius:7px;background:#f2f3f8;color:var(--sub);
+    display:grid;place-items:center;font-size:12.5px;font-weight:700;transition:.16s ease;
+  }
+  .opt .txt{flex:1;min-width:0;font-size:14.5px}
+  .opt.sel{border-color:var(--primary);background:var(--primary-soft)}
+  .opt.sel .key{background:var(--primary);color:#fff}
+  .opt.picked{border-color:var(--primary);background:var(--primary-soft)}
+
+  .nav{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+  .hint{font-size:12.5px;color:#a3a8b5}
+
+  /* 图形选项 */
+  .opt.visual{flex-direction:column;align-items:center;gap:8px;padding:12px 10px;justify-content:center}
+  .opt.visual .txt{font-size:13px;color:var(--sub);flex:none;text-align:center}
+
+  /* ---------- 结果页 ---------- */
+  .score-head{text-align:center;padding:6px 0 26px;border-bottom:1px dashed var(--line);margin-bottom:24px}
+  .score-label{font-size:13px;color:var(--sub);letter-spacing:2px;text-transform:uppercase}
+  .iq{font-size:76px;font-weight:800;line-height:1;letter-spacing:-3px;margin:10px 0 6px;color:var(--primary)}
+  .level{display:inline-block;font-weight:700;font-size:14px;padding:5px 14px;border-radius:999px;background:var(--primary-soft);color:var(--primary)}
+  .score-sub{color:var(--sub);font-size:13.5px;margin-top:12px}
+  .metas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:26px}
+  .meta{background:#f8f9fc;border-radius:12px;padding:12px;text-align:center}
+  .meta b{display:block;font-size:17px}
+  .meta small{font-size:12px;color:var(--sub)}
+
+  h3{font-size:15px;margin:0 0 14px;letter-spacing:-.1px}
+  .dims{margin-bottom:28px}
+  .dim{margin-bottom:14px}
+  .dim .row{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px}
+  .dim .row span:last-child{color:var(--sub);font-variant-numeric:tabular-nums}
+  .bar{height:8px;background:#eef0f6;border-radius:999px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#7c74ea,#4f46e5);border-radius:999px;width:0;transition:width .7s cubic-bezier(.4,0,.2,1)}
+
+  .review{margin-bottom:28px}
+  .item{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .item .head{display:flex;gap:10px;align-items:flex-start;font-size:14px;font-weight:600}
+  .item .tag{flex:none;font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 8px;margin-top:2px}
+  .item .tag.ok{background:#e7f6ee;color:var(--ok)}
+  .item .tag.no{background:#fdeceb;color:var(--bad)}
+  .item .body{font-size:13px;color:var(--sub);margin-top:9px;line-height:1.75}
+  .item .body b{color:var(--text)}
+  .item .body .wrong{color:var(--bad)}
+  .item .body .right{color:var(--ok)}
+
+  .history{margin-bottom:26px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--sub);font-weight:600;font-size:12.5px}
+  td:first-child{color:var(--sub)}
+  .empty{color:#a3a8b5;font-size:13px;padding:6px 0}
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  .actions .btn{flex:1;min-width:150px;text-align:center}
+
+  @media (max-width:560px){
+    body{padding:18px 12px 48px}
+    .card{padding:22px 18px;border-radius:14px}
+    h1{font-size:24px}
+    .iq{font-size:62px}
+    .facts,.metas{grid-template-columns:repeat(3,1fr);gap:8px}
+    .fact b{font-size:16px}
+    .qtext{font-size:17px}
+    .opts.grid2{grid-template-columns:repeat(2,1fr)}
+    .actions .btn{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ 首页 ============ -->
+  <section class="screen on" id="s-intro">
+    <div class="card">
+      <div class="brand"><i></i>智力测评 · 简易量表</div>
+      <h1>测一测你的<span>智商水平</span></h1>
+      <p class="lead">20 道题，覆盖逻辑、数字、语言与空间四个维度，大约 6 分钟完成。做完即刻出分，并给出逐题解析。</p>
+
+      <div class="facts">
+        <div class="fact"><b>20</b><small>题目数量</small></div>
+        <div class="fact"><b>4</b><small>能力维度</small></div>
+        <div class="fact"><b>≈6 分钟</b><small>建议用时</small></div>
+      </div>
+
+      <ul class="rules">
+        <li>请独立完成，不要查阅资料或与他人商量</li>
+        <li>每题只有一个正确答案，凭第一反应作答更准确</li>
+        <li>题目按难度混合排列，遇到难题不要停留太久</li>
+      </ul>
+
+      <button class="btn block" id="btn-start">开始测试</button>
+      <p class="note">说明：本量表为趣味性简化测评，分数由加权正确率映射到标准分（均值 100、标准差 15），仅供自我参考，不能替代专业智力测验或临床评估。</p>
+    </div>
+  </section>
+
+  <!-- ============ 答题页 ============ -->
+  <section class="screen" id="s-quiz">
+    <div class="card">
+      <div class="topbar">
+        <span class="cat" id="q-cat">逻辑推理</span>
+        <span id="q-count">第 1 / 20 题</span>
+      </div>
+      <div class="progress"><i id="q-bar"></i></div>
+
+      <h2 class="qtext" id="q-text"></h2>
+      <div class="qfig" id="q-fig" style="display:none"></div>
+
+      <div class="opts" id="q-opts"></div>
+
+      <div class="nav">
+        <button class="btn ghost" id="btn-prev">上一题</button>
+        <span class="hint" id="q-hint">点击选项自动进入下一题 · 键盘 1-4 选择</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 结果页 ============ -->
+  <section class="screen" id="s-result">
+    <div class="card">
+      <div class="score-head">
+        <div class="score-label">Your IQ Score</div>
+        <div class="iq" id="r-iq">--</div>
+        <div class="level" id="r-level">--</div>
+        <div class="score-sub" id="r-percent">--</div>
+      </div>
+
+      <div class="metas">
+        <div class="meta"><b id="r-correct">--</b><small>综合正确率</small></div>
+        <div class="meta"><b id="r-time">--</b><small>总用时</small></div>
+        <div class="meta"><b id="r-count">--</b><small>答对题数</small></div>
+      </div>
+
+      <h3>各维度表现</h3>
+      <div class="dims" id="r-dims"></div>
+
+      <h3>逐题解析</h3>
+      <div class="review" id="r-review"></div>
+
+      <h3>历史记录</h3>
+      <div class="history" id="r-history"></div>
+
+      <div class="actions">
+        <button class="btn" id="btn-again">再测一次</button>
+        <button class="btn ghost" id="btn-home">返回首页</button>
+      </div>
+    </div>
+    <p class="note" style="text-align:center">本结果基于简化模型估算，用于自我了解与娱乐，不构成任何智力鉴定。</p>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= 图形渲染 ================= */
+  // cells: [[col,row], ...]
+  function gridSVG(cells, cols, rows, cell, hi){
+    cell = cell || 26;
+    const pad = 3;
+    const w = cols*cell + pad*2, h = rows*cell + pad*2;
+    let s = '<svg viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'" xmlns="http://www.w3.org/2000/svg" role="img">';
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const on = cells.some(function(p){ return p[0]===c && p[1]===r; });
+        s += '<rect x="'+(pad+c*cell)+'" y="'+(pad+r*cell)+'" width="'+cell+'" height="'+cell+'" rx="3" fill="'+(on ? (hi||'#4f46e5') : '#f1f2f7')+'"/>';
+      }
+    }
+    return s + '</svg>';
+  }
+
+  // 顺时针旋转 90°（网格坐标 c,r），保持左上角对齐
+  function rotCW(cells){
+    let maxR = 0;
+    cells.forEach(function(p){ if(p[1] > maxR) maxR = p[1]; });
+    const out = cells.map(function(p){ return [maxR - p[1], p[0]]; });
+    let minC = 99, minR = 99;
+    out.forEach(function(p){ if(p[0]<minC) minC=p[0]; if(p[1]<minR) minR=p[1]; });
+    return out.map(function(p){ return [p[0]-minC, p[1]-minR]; });
+  }
+  function mirrorV(cells, cols){
+    return cells.map(function(p){ return [cols-1-p[0], p[1]]; });
+  }
+  function mirrorH(cells, rows){
+    return cells.map(function(p){ return [p[0], rows-1-p[1]]; });
+  }
+  function rot180(cells, cols, rows){
+    return cells.map(function(p){ return [cols-1-p[0], rows-1-p[1]]; });
+  }
+
+  // 正方体 1-4-1 展开图
+  function netSVG(){
+    const cell = 30, pad = 4, gap = 2;
+    const cols = 4, rows = 3;
+    const w = cols*cell + pad*2, h = rows*cell + pad*2;
+    const label = { "0,0":"5", "0,1":"1", "1,1":"2", "2,1":"3", "3,1":"4", "3,2":"6" };
+    let s = '<svg viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'" xmlns="http://www.w3.org/2000/svg" role="img">';
+    Object.keys(label).forEach(function(k){
+      const c = +k.split(',')[0], r = +k.split(',')[1];
+      const x = pad + c*cell + gap/2, y = pad + r*cell + gap/2;
+      s += '<rect x="'+x+'" y="'+y+'" width="'+(cell-gap)+'" height="'+(cell-gap)+'" rx="4" fill="#eef0ff" stroke="#c9cdf0"/>';
+      s += '<text x="'+(x+(cell-gap)/2)+'" y="'+(y+(cell-gap)/2+5)+'" text-anchor="middle" font-size="14" font-weight="700" fill="#4f46e5" font-family="sans-serif">'+label[k]+'</text>';
+    });
+    return s + '</svg>';
+  }
+
+  /* ================= 题库 ================= */
+  // opt 支持字符串，或 {text, svg}
+  const QUESTIONS = [
+    /* ---- 逻辑推理 ---- */
+    {
+      cat:"logic",
+      q:"所有玫瑰都是花，有些花很快凋谢。根据以上陈述，可以确定的是：",
+      options:[
+        "有些玫瑰很快凋谢",
+        "所有玫瑰都会很快凋谢",
+        "有些花不是玫瑰",
+        "无法确定玫瑰是否很快凋谢"
+      ],
+      answer:3, weight:1.2,
+      explain:"“有些花很快凋谢”没有指明是哪种花，玫瑰完全可能属于、也可能不属于这部分花，因此无法作出确定判断。"
+    },
+    {
+      cat:"logic",
+      q:"甲比乙高，丙比甲矮，乙比丁高。谁一定最高？",
+      options:["甲","乙","丙","丁"],
+      answer:0, weight:1.0,
+      explain:"乙比甲矮、丙比甲矮、丁比乙矮，四人都排在甲之下，所以甲一定最高。"
+    },
+    {
+      cat:"logic",
+      q:"“如果下雨，比赛就会取消。已知比赛没有取消。”由此可以推出：",
+      options:["下雨了","没有下雨","雨下得不大","比赛被推迟了"],
+      answer:1, weight:1.0,
+      explain:"这是典型的逆否推理：前提为真时，结论的否定必然导致前提的否定，所以一定是“没下雨”。"
+    },
+    {
+      cat:"logic",
+      q:"班上喜欢数学的人都喜欢物理，喜欢物理的人都喜欢化学。小王不喜欢化学。由此可以推出：",
+      options:["小王喜欢数学","小王不喜欢数学","小王喜欢物理","无法判断小王的偏好"],
+      answer:1, weight:1.3,
+      explain:"若小王喜欢数学，就会依次喜欢物理、化学，与他“不喜欢化学”矛盾，所以他不喜欢数学。"
+    },
+    {
+      cat:"logic",
+      q:"“所有工程师都逻辑清晰。小李逻辑清晰。因此小李是工程师。”这个推理：",
+      options:[
+        "成立，小李确实是工程师",
+        "不成立，逻辑清晰的人未必是工程师",
+        "成立，因为逻辑清晰的人都是工程师",
+        "无法判断小李是否逻辑清晰"
+      ],
+      answer:1, weight:1.5,
+      explain:"这是“肯定后件”的谬误：条件只说明工程师必有此特征，并不说明有此特征者都是工程师——医生、会计同样可能逻辑清晰。"
+    },
+
+    /* ---- 数字推理 ---- */
+    {
+      cat:"numeric",
+      q:"数列推理：2，4，8，16，？",
+      options:["20","24","32","36"],
+      answer:2, weight:1.0,
+      explain:"每一项都是前一项的 2 倍，16 × 2 = 32。"
+    },
+    {
+      cat:"numeric",
+      q:"数列推理：2，3，5，8，13，？",
+      options:["18","20","21","23"],
+      answer:2, weight:1.2,
+      explain:"从第三项起，每项等于前两项之和（2+3=5，3+5=8，5+8=13，8+13=21）。"
+    },
+    {
+      cat:"numeric",
+      q:"数列推理：1，2，6，24，120，？",
+      options:["240","480","600","720"],
+      answer:3, weight:1.3,
+      explain:"分别乘以 2、3、4、5、6：120 × 6 = 720，即阶乘序列。"
+    },
+    {
+      cat:"numeric",
+      q:"数列推理：3，7，16，35，？",
+      options:["69","72","74","76"],
+      answer:2, weight:1.5,
+      explain:"规律是“前项 × 2 依次加 1、2、3、4”：3×2+1=7，7×2+2=16，16×2+3=35，35×2+4=74。"
+    },
+    {
+      cat:"numeric",
+      q:"3 个人 3 天可以制作 3 件产品。照此效率，9 个人 9 天可以制作多少件？",
+      options:["9 件","18 件","27 件","81 件"],
+      answer:2, weight:1.4,
+      explain:"每人每天制作 1/3 件，人数与天数都变为 3 倍，产量变为 3×3=9 倍，即 3×9 = 27 件。"
+    },
+
+    /* ---- 语言类比 ---- */
+    {
+      cat:"verbal",
+      q:"医生 : 医院 ＝ 教师 : ？",
+      options:["学生","讲台","学校","书本"],
+      answer:2, weight:1.0,
+      explain:"前者是职业，后者是其固定工作场所，教师的工作场所是学校。"
+    },
+    {
+      cat:"verbal",
+      q:"手 : 手套 ＝ 头 : ？",
+      options:["头发","帽子","脖子","眼镜"],
+      answer:1, weight:1.0,
+      explain:"手套是戴在手上的保暖/保护用品，对应戴在头上的帽子。"
+    },
+    {
+      cat:"verbal",
+      q:"书籍 : 阅读 ＝ 音乐 : ？",
+      options:["演唱","聆听","乐器","旋律"],
+      answer:1, weight:1.2,
+      explain:"书籍通过“阅读”被接收，音乐通过“聆听”被接收，动作与对象一一对应。"
+    },
+    {
+      cat:"verbal",
+      q:"下列词语中，与其他三项不同类的是：",
+      options:["苹果","香蕉","胡萝卜","橘子"],
+      answer:2, weight:1.0,
+      explain:"苹果、香蕉、橘子都是水果，胡萝卜是蔬菜。"
+    },
+    {
+      cat:"verbal",
+      q:"“辽阔”的反义词是：",
+      options:["宽广","狭窄","空旷","广大"],
+      answer:1, weight:1.1,
+      explain:"辽阔指空间宽广无垠，其反义为狭窄；其余三项均为近义或同义表达。"
+    },
+
+    /* ---- 空间想象 ---- */
+    {
+      cat:"spatial",
+      q:"图中 L 形沿顺时针方向旋转 90° 后，是哪一项？",
+      options:[
+        { text:"", cells:[[0,1],[1,0],[1,1]] },
+        { text:"", cells:[[0,0],[1,0],[0,1]] },
+        { text:"", cells:[[0,0],[0,1],[1,1]] },
+        { text:"", cells:[[0,0],[1,0],[1,1]] }
+      ],
+      figure:"grid",
+      figureCells:[[0,0],[0,1],[1,1]],
+      answer:1, weight:1.3,
+      explain:"原图由左侧竖着的两格和底部向右一格组成。顺时针旋转 90° 后，竖边移到顶部、底边转到左侧，于是顶排有两格、左上角再向下延伸一格。"
+    },
+    {
+      cat:"spatial",
+      q:"下图是正方体的展开图，折叠成正方体后，与面 3 相对的是哪个面？",
+      options:["面 1","面 2","面 4","面 6"],
+      figure:"net",
+      answer:0, weight:1.5,
+      explain:"折叠后 1 为前面、2 为右面、3 为后面、4 为左面、5 为上面、6 为下面。相对面为 1↔3、2↔4、5↔6，故 3 的对面是 1。"
+    },
+    {
+      cat:"spatial",
+      q:"下列哪一项是左侧图形关于竖直中线左右翻转后的镜像？",
+      options:[
+        { text:"", cells:[[0,0],[1,0],[0,1],[0,2]] },
+        { text:"", cells:[[1,0],[2,0],[2,1],[2,2]] },
+        { text:"", cells:[[0,0],[1,2],[0,1],[0,2]] },
+        { text:"", cells:[[2,2],[1,2],[2,1],[2,0]] }
+      ],
+      figure:"grid",
+      figureCells:[[0,0],[1,0],[0,1],[0,2]],
+      answer:1, weight:1.4,
+      explain:"原图是左列三格加上顶排向右一格。左右翻转只是调换左右次序，翻转后变成右列三格加上顶排向左一格。"
+    },
+    {
+      cat:"spatial",
+      q:"把一张纸沿纵向对折，再沿横向对折，然后在叠好的纸角上剪出一个圆洞。展开后一共有几个洞？",
+      options:["2 个","3 个","4 个","8 个"],
+      answer:2, weight:1.2,
+      explain:"两次对折把纸分成 4 层，剪出的一个洞在展开时会对称出现 4 次。"
+    },
+    {
+      cat:"spatial",
+      q:"英文字母 W 有几条对称轴？",
+      options:["0 条","1 条","2 条","4 条"],
+      answer:1, weight:1.1,
+      explain:"W 沿中间的竖直线左右对称，但上下并不对称（倒过来看变成 M 的形态），所以只有 1 条对称轴。"
+    }
+  ];
+
+  const CAT_NAME = { logic:"逻辑推理", numeric:"数字推理", verbal:"语言类比", spatial:"空间想象" };
+  const CAT_ORDER = ["logic","numeric","verbal","spatial"];
+
+  /* ================= 状态 ================= */
+  const state = { idx:0, answers:new Array(QUESTIONS.length).fill(null), t0:0, seconds:0, timer:null };
+  const $ = function(id){ return document.getElementById(id); };
+
+  function show(id){
+    ["s-intro","s-quiz","s-result"].forEach(function(k){
+      $(k).classList.toggle("on", k === id);
+    });
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  /* ================= 首页 ================= */
+  $("btn-start").addEventListener("click", start);
+  $("btn-again").addEventListener("click", start);
+  $("btn-home").addEventListener("click", function(){ show("s-intro"); });
+
+  function start(){
+    state.idx = 0;
+    state.answers = new Array(QUESTIONS.length).fill(null);
+    state.t0 = Date.now();
+    if(state.timer) clearInterval(state.timer);
+    state.timer = setInterval(function(){
+      state.seconds = Math.floor((Date.now() - state.t0)/1000);
+    }, 1000);
+    state.seconds = 0;
+    show("s-quiz");
+    render();
+  }
+
+  /* ================= 答题 ================= */
+  let advTimer = null;
+
+  function render(){
+    const q = QUESTIONS[state.idx];
+    const n = QUESTIONS.length;
+
+    $("q-cat").textContent = CAT_NAME[q.cat];
+    $("q-count").textContent = "第 " + (state.idx+1) + " / " + n + " 题";
+    $("q-bar").style.width = ((state.idx) / n * 100) + "%";
+    $("q-text").textContent = q.q;
+
+    // 题干图
+    const fig = $("q-fig");
+    fig.innerHTML = "";
+    if(q.figure === "grid"){
+      const g = q.figureCells.reduce(function(m,p){ return Math.max(m,p[0],p[1]); }, 0) + 1;
+      fig.style.display = "flex";
+      fig.innerHTML = gridSVG(q.figureCells, g, g, 46, "#4f46e5");
+    }else if(q.figure === "net"){
+      fig.style.display = "flex";
+      fig.innerHTML = netSVG();
+    }else{
+      fig.style.display = "none";
+    }
+
+    // 选项
+    const box = $("q-opts");
+    box.innerHTML = "";
+    const visual = !!(q.options[0] && typeof q.options[0] === "object");
+    box.className = "opts" + (visual ? " grid2" : "");
+
+    q.options.forEach(function(opt, i){
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt" + (visual ? " visual" : "");
+      if(state.answers[state.idx] === i) b.classList.add("sel");
+
+      const key = document.createElement("span");
+      key.className = "key";
+      key.textContent = visual ? String.fromCharCode(65 + i) : String(i+1);
+
+      const txt = document.createElement("span");
+      txt.className = "txt";
+
+      if(typeof opt === "object"){
+        const holder = document.createElement("span");
+        const max = opt.cells.reduce(function(m,p){ return Math.max(m,p[0],p[1]); }, 0);
+        holder.innerHTML = gridSVG(opt.cells, max+1, max+1, 30);
+        b.appendChild(holder);
+        txt.textContent = opt.text || ("选项 " + String.fromCharCode(65 + i));
+        b.appendChild(txt);
+      }else{
+        txt.textContent = opt;
+        b.appendChild(key);
+        b.appendChild(txt);
+      }
+
+      b.addEventListener("click", function(){ pick(i); });
+      box.appendChild(b);
+    });
+
+    $("btn-prev").style.visibility = state.idx === 0 ? "hidden" : "visible";
+    $("q-hint").textContent = state.idx === n-1 ? "选择后即可查看结果" : "点击选项自动进入下一题 · 键盘 1-4 选择";
+  }
+
+  function pick(i){
+    state.answers[state.idx] = i;
+    const nodes = $("q-opts").querySelectorAll(".opt");
+    nodes.forEach(function(n, k){ n.classList.toggle("sel", k === i); });
+    if(advTimer) clearTimeout(advTimer);
+    advTimer = setTimeout(function(){
+      if(state.idx === QUESTIONS.length - 1) finish();
+      else { state.idx++; render(); }
+    }, 230);
+  }
+
+  $("btn-prev").addEventListener("click", function(){
+    if(advTimer) clearTimeout(advTimer);
+    if(state.idx > 0){ state.idx--; render(); }
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(!$("s-quiz").classList.contains("on")) return;
+    const n = QUESTIONS.length;
+    if(e.key >= "1" && e.key <= "4"){
+      const i = +e.key - 1;
+      if(i < QUESTIONS[state.idx].options.length) pick(i);
+    }else if(e.key === "ArrowLeft" || e.key === "Backspace"){
+      if(advTimer) clearTimeout(advTimer);
+      if(state.idx > 0){ state.idx--; render(); }
+    }else if(e.key === "ArrowRight"){
+      if(advTimer) clearTimeout(advTimer);
+      if(state.idx < n-1){ state.idx++; render(); }
+    }
+  });
+
+  /* ================= 结算 ================= */
+  function fmtTime(sec){
+    const m = Math.floor(sec/60), s = sec % 60;
+    return m + " 分 " + (s<10?"0":"") + s + " 秒";
+  }
+
+  function levelOf(iq){
+    if(iq >= 130) return { t:"非常优秀", d:"表现显著高于一般水平，抽象推理与模式识别能力突出。" };
+    if(iq >= 120) return { t:"优秀", d:"多项能力均高于平均水平，复杂问题处理能力强。" };
+    if(iq >= 110) return { t:"中上", d:"整体表现优于多数同龄人，逻辑与数字能力较稳定。" };
+    if(iq >= 90)  return { t:"中等", d:"处于人群最常见区间，各项能力发展较为均衡。" };
+    if(iq >= 80)  return { t:"中下", d:"部分题型存在明显短板，可通过针对性练习改善。" };
+    return { t:"有待提升", d:"本次发挥偏低，可能与状态、注意力或题型熟悉度有关，建议休息后再试一次。" };
+  }
+
+  const HISTORY_KEY = "iqtest_history_v1";
+
+  function finish(){
+    if(state.timer) clearInterval(state.timer);
+    state.seconds = Math.max(1, Math.floor((Date.now() - state.t0)/1000));
+
+    let got = 0, total = 0, rightCount = 0;
+    const cat = {};
+    CAT_ORDER.forEach(function(c){ cat[c] = { ok:0, n:0 }; });
+
+    QUESTIONS.forEach(function(q, i){
+      total += q.weight;
+      const ok = state.answers[i] === q.answer;
+      if(ok){ got += q.weight; rightCount++; }
+      cat[q.cat].n++;
+      if(ok) cat[q.cat].ok++;
+    });
+
+    let p = total ? got/total : 0;
+    p = Math.max(0.02, Math.min(0.995, p));
+    let iq = Math.round(100 + 15 * Math.log(p/(1-p)) * 0.62);
+    iq = Math.max(55, Math.min(145, iq));
+
+    const z = (iq - 100) / 15;
+    const pct = Math.round(100 / (1 + Math.exp(-1.702 * z)));
+
+    $("r-iq").textContent = iq;
+    const lv = levelOf(iq);
+    $("r-level").textContent = lv.t;
+    $("r-percent").textContent = "高于约 " + pct + "% 的测试者 · " + lv.d;
+    $("r-correct").textContent = Math.round(p*100) + "%";
+    $("r-time").textContent = fmtTime(state.seconds);
+    $("r-count").textContent = rightCount + " / " + QUESTIONS.length;
+
+    // 维度
+    const dims = $("r-dims");
+    dims.innerHTML = "";
+    CAT_ORDER.forEach(function(c){
+      const s = cat[c];
+      const rate = s.n ? s.ok/s.n : 0;
+      const el = document.createElement("div");
+      el.className = "dim";
+      el.innerHTML =
+        '<div class="row"><span>'+CAT_NAME[c]+'</span><span>答对 '+s.ok+' / '+s.n+'</span></div>' +
+        '<div class="bar"><i></i></div>';
+      dims.appendChild(el);
+      requestAnimationFrame(function(){
+        setTimeout(function(){ el.querySelector(".bar i").style.width = (rate*100) + "%"; }, 60);
+      });
+    });
+
+    // 逐题解析
+    const rv = $("r-review");
+    rv.innerHTML = "";
+    QUESTIONS.forEach(function(q, i){
+      const mine = state.answers[i];
+      const ok = mine === q.answer;
+      const label = function(idx){
+        const o = q.options[idx];
+        if(o && typeof o === "object") return "选项 " + String.fromCharCode(65 + idx);
+        return o;
+      };
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML =
+        '<div class="head">' +
+          '<span class="tag '+(ok?'ok':'no')+'">'+(ok?'正确':'错误')+'</span>' +
+          '<span>'+(i+1)+'. '+q.q+'</span>' +
+        '</div>' +
+        '<div class="body">' +
+          '你的答案：<span class="'+(ok?'right':'wrong')+'">' + (mine==null?"未作答":label(mine)) + '</span>' +
+          (ok ? '' : '　|　正确答案：<span class="right">' + label(q.answer) + '</span>') +
+          '<br>' + q.explain +
+        '</div>';
+      rv.appendChild(el);
+    });
+
+    // 历史
+    let list = [];
+    try{ list = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); }catch(e){ list = []; }
+    const now = new Date();
+    list.unshift({
+      d: now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0") + " " +
+         String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0"),
+      iq: iq, c: rightCount, s: state.seconds
+    });
+    list = list.slice(0, 8);
+    try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); }catch(e){}
+
+    const hs = $("r-history");
+    if(!list.length){
+      hs.innerHTML = '<p class="empty">暂无记录</p>';
+    }else{
+      let rows = '<table><thead><tr><th>时间</th><th>智商分</th><th>答对</th><th>用时</th></tr></thead><tbody>';
+      list.forEach(function(r){
+        rows += '<tr><td>'+r.d+'</td><td><b>'+r.iq+'</b></td><td>'+r.c+' / '+QUESTIONS.length+'</td><td>'+fmtTime(r.s)+'</td></tr>';
+      });
+      hs.innerHTML = rows + '</tbody></table>';
+    }
+
+    show("s-result");
+  }
+})();
+</script>
+</body>
+</html>
